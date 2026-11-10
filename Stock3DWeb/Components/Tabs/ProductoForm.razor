@@ -1,0 +1,69 @@
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">@(Item.Id == 0 ? "Crear Nuevo Producto" : $"Editando: {Item.Nombre}")</div>
+    <div class="card-body">
+        <div class="row g-2 mb-3">
+            <div class="col-12 col-md-6">
+                <label class="form-label mb-1">Nombre del Producto:</label>
+                <input type="text" class="form-control" @bind="Item.Nombre" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Categoría:</label>
+                <input type="text" class="form-control" @bind="Item.Categoria" placeholder="Ej. Llaveros" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Tipo Impresión:</label>
+                <select class="form-select" @bind="Item.TipoImpresion" @bind:after="AjustarReceta">
+                    <option>@Producto.UnColor</option>
+                    <option>@Producto.Multicolor</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label mb-1">Costo Impresión ($):</label>
+                <input type="number" step="0.01" min="0" class="form-control" placeholder="Luz, máquina..." @bind="Item.CostoImpresion" @bind:event="oninput" />
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label mb-1">Costo Agregado ($):</label>
+                <input type="number" step="0.01" min="0" class="form-control" placeholder="Pintura, cadena, LED..." @bind="Item.CostoAgregado" @bind:event="oninput" />
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="form-label mb-1 fw-bold text-primary">Precio Venta ($):</label>
+                <input type="number" step="0.01" min="1" class="form-control" @bind="Item.PrecioVenta" @bind:event="oninput" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Stock Actual:</label>
+                <input type="number" min="0" class="form-control" @bind="Item.StockActual" />
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label mb-1">Stock Mínimo:</label>
+                <input type="number" min="0" class="form-control" @bind="Item.StockMinimo" />
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label mb-1">Link al archivo STL / Modelo 3D:</label>
+                <div class="input-group">
+                    <input type="url" class="form-control" placeholder="https://makerworld.com/..." @bind="Item.LinkStl" />
+                    @if (Item.TieneLink)
+                    {
+                        <a href="@Item.UrlStl" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary" title="Probar link en pestaña nueva">Abrir ↗</a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <RecetaEditor Item="Item" Filamentos="Filamentos" />
+
+        <button class="btn btn-primary w-100" @onclick="OnGuardar">Guardar Producto</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Producto Item { get; set; } = default!;
+    [Parameter, EditorRequired] public List<Filamento> Filamentos { get; set; } = default!;
+    [Parameter] public EventCallback OnGuardar { get; set; }
+
+    // Un producto "Un color" admite una sola fila de receta.
+    private void AjustarReceta()
+    {
+        if (Item.TipoImpresion == Producto.UnColor)
+            Item.Filamentos = Item.Filamentos.Take(1).ToList();
+    }
+}

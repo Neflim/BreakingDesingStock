@@ -1,0 +1,50 @@
+<div class="card border-primary shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span>Desglose completo de costo: <strong>@Item.Nombre</strong></span>
+        <button class="btn btn-sm btn-light" @onclick="OnCerrar">Cerrar</button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Concepto / Filamento</th>
+                    <th class="text-end">Precio/Kg</th>
+                    <th class="text-end">Gramos Pieza</th>
+                    <th class="text-end">Gramos Desperdicio</th>
+                    <th class="text-end">Total Gramos</th>
+                    <th class="text-end">Subtotal Costo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Item.Filamentos)
+                {
+                    <tr>
+                        <td>@f.FilamentoNombre</td>
+                        <td class="text-end">@f.PrecioPorKgFilamento.ToString("C2")</td>
+                        <td class="text-end">@f.GramosUtilizados.ToString("N1") g</td>
+                        <td class="text-end">@f.GramosDesperdicio.ToString("N1") g</td>
+                        <td class="text-end fw-semibold">@f.GramosTotales.ToString("N1") g</td>
+                        <td class="text-end fw-bold">@f.CostoSubtotal.ToString("C2")</td>
+                    </tr>
+                }
+                <tr class="table-light">
+                    <td colspan="5">Costo de Impresión (luz, desgaste y amortización)</td>
+                    <td class="text-end fw-bold">@Item.CostoImpresion.ToString("C2")</td>
+                </tr>
+                <tr class="table-light">
+                    <td colspan="5">Costo Agregado / Extra (pintura, cadenas, LED, imanes, etc.)</td>
+                    <td class="text-end fw-bold">@Item.CostoAgregado.ToString("C2")</td>
+                </tr>
+                <tr class="table-warning fw-bold">
+                    <td colspan="5">TOTAL COSTO DEL PRODUCTO (Filamento + Desperdicio + Impresión + Agregado)</td>
+                    <td class="text-end text-danger">@Item.CostoProduccion.ToString("C2")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Producto Item { get; set; } = default!;
+    [Parameter] public EventCallback OnCerrar { get; set; }
+}

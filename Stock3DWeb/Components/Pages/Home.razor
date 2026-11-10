@@ -1,0 +1,39 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Stock 3D - WebApp (PC & Móvil)</PageTitle>
+
+<div class="container-fluid py-3 px-2 px-md-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div>
+            <h4 class="mb-0 fw-bold text-primary">Stock Breaking Desing</h4>
+            <small class="text-muted">Gestión Un Color y Multicolor (PC & Celular)</small>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm mt-2 mt-sm-0" @onclick="() => _version++">🔄 Actualizar Datos</button>
+    </div>
+
+    <ul class="nav nav-pills nav-fill mb-3 gap-1 bg-light p-1 rounded border">
+        @foreach (var (titulo, tipo) in Tabs)
+        {
+            <li class="nav-item">
+                <button class="nav-link @(_activa == tipo ? "active fw-bold" : "")" @onclick="() => _activa = tipo">@titulo</button>
+            </li>
+        }
+    </ul>
+
+    @* @key recrea la pestaña al actualizar, así vuelve a leer la base de datos *@
+    <DynamicComponent Type="_activa" @key="_version" />
+</div>
+
+@code {
+    private static readonly (string Titulo, Type Tipo)[] Tabs =
+    [
+        ("Ventas del Día", typeof(TabVentasDia)),
+        ("Costos y Precios", typeof(TabCostosPrecios)),
+        ("Productos", typeof(TabProductos)),
+        ("Filamentos", typeof(TabFilamentos))
+    ];
+
+    private Type _activa = typeof(TabVentasDia);
+    private int _version;
+}

@@ -1,0 +1,13 @@
+@if (!string.IsNullOrEmpty(Mensaje))
+{
+    <div class="alert @(EsError ? "alert-danger" : "alert-success") alert-dismissible fade show py-2" role="alert">
+        @Mensaje
+        <button type="button" class="btn-close" @onclick="OnCerrar"></button>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Mensaje { get; set; }
+    [Parameter] public bool EsError { get; set; }
+    [Parameter] public EventCallback OnCerrar { get; set; }
+}

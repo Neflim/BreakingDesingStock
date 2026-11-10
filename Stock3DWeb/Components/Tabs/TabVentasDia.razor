@@ -1,0 +1,84 @@
+@inherits TabBase
+
+<Alerta Mensaje="@Mensaje" EsError="@EsError" OnCerrar="CerrarMensaje" />
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-sm-5 col-md-3">
+                <label class="form-label fw-semibold mb-1">Fecha de consulta:</label>
+                <input type="date" class="form-control" @bind="_fecha" @bind:after="Recargar" />
+            </div>
+            <div class="col-12 col-sm-7 col-md-9 text-sm-end">
+                <button class="btn btn-primary" @onclick="() => _mostrarVenta = true">➕ Registrar Venta Rápida</button>
+            </div>
+        </div>
+
+        @if (_mostrarVenta)
+        {
+            <div class="card border-primary mt-3 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold text-primary mb-3">Registrar Nueva Venta</h6>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label mb-1">Producto:</label>
+                            <select class="form-select" @bind="_productoId">
+                                @foreach (var i in _items)
+                                {
+                                    <option value="@i.ProductoId">@i.ProductoNombre (Disp: @i.StockActual | @i.PrecioVentaActual.ToString("C2"))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label mb-1">Cantidad:</label>
+                            <input type="number" min="1" class="form-control" @bind="_cantidad" />
+                        </div>
+                        <div class="col-6 col-md-3 d-flex gap-2">
+                            <button class="btn btn-success flex-fill" @onclick="ConfirmarAsync">Confirmar</button>
+                            <button class="btn btn-outline-secondary" @onclick="() => _mostrarVenta = false">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="table-responsive shadow-sm rounded border bg-white">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Producto</th>
+                <th class="text-center">Stock Inicial</th>
+                <th class="text-center">Vendido Hoy</th>
+                <th class="text-center">Stock Actual</th>
+                <th class="text-center">Mínimo</th>
+                <th class="text-end">Monto Vendido</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in _items)
+            {
+                <tr class="@(i.BajoStockMinimo ? "table-danger fw-semibold" : "")">
+                    <td>
+                        @i.ProductoNombre
+                        @if (i.BajoStockMinimo)
+                        {
+                            <span class="badge bg-danger ms-1">¡Bajo Mínimo!</span>
+                        }
+                    </td>
+                    <td class="text-center">@i.StockInicialDia</td>
+                    <td class="text-center">@i.VendidoEnFecha</td>
+                    <td class="text-center fw-bold">@i.StockActual</td>
+                    <td class="text-center">@i.StockMinimo</td>
+                    <td class="text-end">@i.MontoVendidoEnFecha.ToString("C2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="alert alert-secondary mt-3 mb-0 fw-bold d-flex flex-wrap justify-content-between">
+    <span>Total vendido (@_fecha.ToString("dd/MM/yyyy")): @_items.Sum(i => i.VendidoEnFecha) unidades</span>
+    <span>Monto total del día: @_items.Sum(i => i.MontoVendidoEnFecha).ToString("C2")</span>
+</div>

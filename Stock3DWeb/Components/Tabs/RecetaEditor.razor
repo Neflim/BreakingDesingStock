@@ -1,0 +1,79 @@
+@* Receta editable del producto + resumen de costo en vivo. Vive junto para que ambos se actualicen con cada tecla. *@
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="fw-bold">Receta de Filamentos (Pieza + Desperdicio):</span>
+    @if (Item.TipoImpresion == Producto.Multicolor || Item.Filamentos.Count == 0)
+    {
+        <button class="btn btn-sm btn-outline-primary" @onclick="Agregar">Agregar Filamento</button>
+    }
+</div>
+
+<div class="table-responsive mb-3">
+    <table class="table table-bordered align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Filamento</th>
+                <th style="width: 120px;">Gramos Pieza</th>
+                <th style="width: 120px;">Desperdicio (g)</th>
+                <th class="text-end">Subtotal</th>
+                <th style="width: 50px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fila in Item.Filamentos)
+            {
+                <tr>
+                    <td>
+                        <select class="form-select form-select-sm" @bind="fila.FilamentoId" @bind:after="() => Sincronizar(fila)">
+                            @foreach (var f in Filamentos)
+                            {
+                                <option value="@f.Id">@f.DescripcionCombo</option>
+                            }
+                        </select>
+                    </td>
+                    <td><input type="number" step="0.1" min="0.1" class="form-control form-control-sm" @bind="fila.GramosUtilizados" @bind:event="oninput" /></td>
+                    <td><input type="number" step="0.1" min="0" class="form-control form-control-sm" @bind="fila.GramosDesperdicio" @bind:event="oninput" /></td>
+                    <td class="text-end fw-semibold">@fila.CostoSubtotal.ToString("C2")</td>
+                    <td class="text-center">
+                        @if (Item.Filamentos.Count > 1)
+                        {
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Item.Filamentos.Remove(fila)">X</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="alert alert-success py-2 mb-3">
+    <div class="d-flex flex-wrap justify-content-between small text-muted border-bottom pb-1 mb-1">
+        <span>Filamento + Desperdicio: <strong>@Item.CostoFilamentos.ToString("C2")</strong></span>
+        <span>Impresión: <strong>@Item.CostoImpresion.ToString("C2")</strong></span>
+        <span>Costo Agregado: <strong>@Item.CostoAgregado.ToString("C2")</strong></span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center">
+        <span>Costo Total Producto: <strong class="text-danger">@Item.CostoProduccion.ToString("C2")</strong></span>
+        <span>Ganancia Unit.: <strong>@Item.GananciaUnitaria.ToString("C2")</strong></span>
+        <span>Margen: <strong>@Item.MargenPorcentaje.ToString("N1")%</strong></span>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Producto Item { get; set; } = default!;
+    [Parameter, EditorRequired] public List<Filamento> Filamentos { get; set; } = default!;
+
+    private void Agregar()
+    {
+        if (Filamentos.Count > 0)
+            Item.Filamentos.Add(ProductoFilamento.Desde(Filamentos[0]));
+    }
+
+    // Al cambiar de filamento, la fila toma su nombre y precio actual.
+    private void Sincronizar(ProductoFilamento fila)
+    {
+        var f = Filamentos.First(x => x.Id == fila.FilamentoId);
+        fila.FilamentoNombre = f.Nombre;
+        fila.PrecioPorKgFilamento = f.PrecioPorKg;
+    }
+}

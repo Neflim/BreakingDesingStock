@@ -1,0 +1,87 @@
+@inherits TabBase
+
+<Alerta Mensaje="@Mensaje" EsError="@EsError" OnCerrar="CerrarMensaje" />
+
+@{ var filtrados = Filtrar(); }
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input type="text" class="form-control" placeholder="Buscar por nombre o categoría..." @bind="_texto" @bind:event="oninput" />
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select" @bind="_categoria">
+                    <option value="">Todas las categorías</option>
+                    @foreach (var cat in Categorias())
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select" @bind="_tipo">
+                    <option value="">Todos (Un color y Multicolor)</option>
+                    <option>@Producto.UnColor</option>
+                    <option>@Producto.Multicolor</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <button class="btn btn-outline-secondary w-100" @onclick="Limpiar">Limpiar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive shadow-sm rounded border bg-white mb-3">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th class="text-center">Stock</th>
+                <th class="text-end">Gramos (g)</th>
+                <th class="text-end">Costo Filamento</th>
+                <th class="text-end">Costo Impresión</th>
+                <th class="text-end">Costo Agregado</th>
+                <th class="text-end table-warning">Costo Producto</th>
+                <th class="text-end">Precio Venta</th>
+                <th class="text-end">Ganancia</th>
+                <th class="text-end">Margen</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in filtrados)
+            {
+                <tr class="@(p == _desglose ? "table-primary" : "")">
+                    <td class="fw-semibold">
+                        @p.Nombre
+                        <small class="text-muted d-block">@p.Categoria (@p.ResumenFilamentos)</small>
+                    </td>
+                    <td><span class="badge @(p.TipoImpresion == Producto.Multicolor ? "bg-info text-dark" : "bg-secondary")">@p.TipoImpresion</span></td>
+                    <td class="text-center fw-bold">@p.StockActual</td>
+                    <td class="text-end">@p.GramosTotales.ToString("N1") g</td>
+                    <td class="text-end">@p.CostoFilamentos.ToString("C2")</td>
+                    <td class="text-end">@p.CostoImpresion.ToString("C2")</td>
+                    <td class="text-end">@p.CostoAgregado.ToString("C2")</td>
+                    <td class="text-end text-danger fw-bold table-warning">@p.CostoProduccion.ToString("C2")</td>
+                    <td class="text-end fw-bold">@p.PrecioVenta.ToString("C2")</td>
+                    <td class="text-end text-success fw-semibold">@p.GananciaUnitaria.ToString("C2")</td>
+                    <td class="text-end">@p.MargenPorcentaje.ToString("N1")%</td>
+                    <td class="text-end"><button class="btn btn-sm btn-outline-primary" @onclick="() => _desglose = p">Ver desglose</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="alert alert-info fw-bold d-flex flex-wrap justify-content-between">
+    <span>Valor Stock a Costo Total: @filtrados.Sum(p => p.ValorStockCosto).ToString("C2")</span>
+    <span>Valor Stock a Precio de Venta: @filtrados.Sum(p => p.ValorStockVenta).ToString("C2")</span>
+</div>
+
+@if (_desglose is not null)
+{
+    <DesgloseCosto Item="_desglose" OnCerrar="() => _desglose = null" />
+}
